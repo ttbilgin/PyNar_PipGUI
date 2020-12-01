@@ -13,7 +13,7 @@
 </code></pre>
 
 <p>Programı çalıştırabilmek için indirdiğiniz dosyada ana dizin içerisinde komut satırını (CMD) başlatıp aşağıdaki kodu çalıştırmanız yeterlidir:</p>
-<pre><code>PipGUI.py
+<pre><code> python PipGUI.py
 </code></pre>
 <h1><a id="user-content-ekran-görüntüleri" class= "anchor" aria-hidden="true" href="#ekran-görüntüleri"></a>
         Programın ekran görüntüleri: </h1>
