@@ -19,5 +19,8 @@
         Programın ekran görüntüleri: </h1>
         
  <p> <a href="https://github.com/ttbilgin/PyNar_PipGUI/blob/issue-1-creating-a-PipGUI-window/Screenshot_1.png"><img src="https://github.com/ttbilgin/PyNar_PipGUI/raw/issue-1-creating-a-PipGUI-window/Screenshot_1.png"></a></p>
+ <p> <a href="https://github.com/ttbilgin/PyNar_PipGUI/blob/issue-1-creating-a-PipGUI-window/Screenshot_4.png"><img src="https://github.com/ttbilgin/PyNar_PipGUI/raw/issue-1-creating-a-PipGUI-window/Screenshot_4.png"></a></p>
+ <p> <a href="https://github.com/ttbilgin/PyNar_PipGUI/blob/issue-1-creating-a-PipGUI-window/Screenshot_2.png"><img src="https://github.com/ttbilgin/PyNar_PipGUI/raw/issue-1-creating-a-PipGUI-window/Screenshot_2.png"></a></p>
+ <p> <a href="https://github.com/ttbilgin/PyNar_PipGUI/blob/issue-1-creating-a-PipGUI-window/Screenshot_3.png"><img src="https://github.com/ttbilgin/PyNar_PipGUI/raw/issue-1-creating-a-PipGUI-window/Screenshot_3.png"></a></p>
         
                         
