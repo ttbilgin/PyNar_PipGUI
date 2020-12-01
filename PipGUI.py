@@ -53,6 +53,7 @@ class Window(QMainWindow):
         widget.setLayout(v_box)
         widget.setFixedWidth(600)
         widget.setFixedHeight(400)
+        self.setWindowTitle("Manage Packages")
         self.setCentralWidget(widget)
 
 
