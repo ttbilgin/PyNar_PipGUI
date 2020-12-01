@@ -8,8 +8,7 @@
                         Kurulum</h2>
                 <p>Program Python dili ile programlandığında bilgisayarınızda <code>Python</code> kurulu olmalıdır. Şu linkten indirebilirsiniz:</p> 
                 <pre><code>https://www.python.org/downloads/</code></pre>
-                
-                <p>Ek olarak Pyhton için platformlar arası arayüz desteği sunan <code>PyQt5</code> eklentisi kurulmalıdır:</p>
+                <p> Ek olarak Python için
 <pre><code>pip3 install pyqt5
 </code></pre>
 
