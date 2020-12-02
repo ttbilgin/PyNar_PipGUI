@@ -2,3 +2,7 @@ QTextEdit {
     background-color: #f4f1f0 ;
 
 }
+QFrame {
+
+    background-color: #f4f1f0 ;
+}
