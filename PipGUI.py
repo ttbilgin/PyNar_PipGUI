@@ -69,7 +69,7 @@ class Window(QMainWindow):
         Lwidget.setLayout(Mainbox)
         Mainbox.addLayout(hbox1)
         self.ListBox = QListWidget()
-        self.ListBox.setFixedWidth(100)
+        self.ListBox.setFixedWidth(200)
         self.ListBox.setFixedHeight(350)
         self.PListInfo = QTextEdit()
         self.PListInfo.setReadOnly(True)
@@ -167,6 +167,12 @@ class Window(QMainWindow):
 
         if isInstalled == True:
            pName = self.dPackageDict['name']
+           try:
+               tempList = pName.split("_")
+           except Exception as e :
+               print(e)
+           else :
+               pName = "-".join(tempList)
            self.PListInfo.setText(f"{str(self.dPackageDict['name']).upper()}")
            self.PListInfo.append("\n")
            self.PListInfo.append(f"Installed version : {self.dPackageDict[pName.lower()]}")
@@ -187,6 +193,7 @@ class Window(QMainWindow):
             self.IListInfo.append(f"Author : {self.dPackageDict['Author']} ")
             self.IListInfo.append(f"Requires : {str(self.dPackageDict['Requirements'])}")
         return
+
 
 #class IPackage(QDialog) :
     #def __init__(self):
