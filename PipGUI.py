@@ -11,17 +11,17 @@ import sys
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(open('styling.qss', 'r').read())
-        self.tabWidget = QTabWidget()
+
         self.setUI()
         self.show()
 
 
 
     def setUI(self):
+        self.setStyleSheet(open('styling.qss', 'r').read())
         self.baseUrl = 'https://pypi.org/pypi/' #datayı cekecegimiz sayfa
         #self.searchurl = 'https://pypi.org/search/?q=' #sayfanın arama kısmı
-
+        self.tabWidget = QTabWidget()
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'} #bağlantının engellenmemesi için kullanılan user agent
 
 
@@ -34,42 +34,7 @@ class Window(QMainWindow):
         self.setWindowTitle("Paketleri Yönet")
 
 
-        '''widget = QWidget()
-        v_box = QVBoxLayout()
-        h_box = QHBoxLayout()
-        h_box1 = QHBoxLayout()
 
-        self.searchLine = QLineEdit("")
-        self.searchLine.setPlaceholderText("Enter a package name :")
-        self.searchButton = QPushButton("Find package from PyPI")
-        self.listItems = QListWidget()
-        self.listItems.setFixedWidth(200)
-        self.listItems.setFixedHeight(300)
-
-        self.dPackageDict = self._setInstructıonPage() #GUI ilk açıldığında gözüken sayfa
-
-        self.sonuc = QTextEdit()
-        self.sonuc.setFrameStyle(0)
-        self.sonuc.setReadOnly(True)
-        self.sonuc.setFixedHeight(300)
-        v_box.addLayout(h_box)
-        v_box.addLayout(h_box1)
-
-        h_box.addWidget(self.searchLine)
-        h_box.addWidget(self.searchButton)
-        h_box1.addWidget(self.listItems)
-        h_box1.addWidget(self.sonuc)
-
-        self.searchButton.clicked.connect(lambda: self._searchQuery(self.searchLine)) #buton tıklanıldığında arama algoritması çalışır
-        self.listItems.itemClicked.connect(lambda: self._listItemClicked()) #listedeki install elemanına tıklanıldığında instruction gelir
-
-
-        widget.setLayout(v_box)
-        widget.setFixedWidth(600)
-        widget.setFixedHeight(400)
-        self.setWindowTitle("Manage Packages")
-        self.setCentralWidget(widget)
-        '''
 
     def _setIpackage(self):
         Iwidget = QWidget()
@@ -126,10 +91,10 @@ class Window(QMainWindow):
         packageURL = "https://pypi.org/project/"+packageName+"/"
         jsonDataUrl = self.baseUrl + urllib.parse.quote(
             packageName) + "/json"  # lineedit'e yazılan değere göre sitede arama yapıyoruz
-        packageDict = {"isInstalled": False}
-        packageDict['PyPI page'] = packageURL
-        packageDict['Json page'] = jsonDataUrl
-        self._fetchPackageData(packageDict)
+        self.dPackageDict['isInstalled'] = False
+        self.dPackageDict['PyPI page'] = packageURL
+        self.dPackageDict['Json page'] = jsonDataUrl
+        self._fetchPackageData()
 
 
 
@@ -137,39 +102,32 @@ class Window(QMainWindow):
 
 
 
-    def _fetchPackageData(self,packageDict):
+    def _fetchPackageData(self):
         import  json
 
         try:
-            req = requests.get(packageDict['Json page'], headers=self.headers)
+            req = requests.get(self.dPackageDict['Json page'], headers=self.headers)
             jsonData = req.json()
-
 
         except Exception as e:
             self._packageNotFound()
             print(e)
 
+        else:
 
+            self.dPackageDict['Author'] = jsonData['info']['author']
+            self.dPackageDict['name'] = jsonData['info']['name']
+            self.dPackageDict['version'] = jsonData['info']['version']
+            self.dPackageDict['details'] = jsonData['info']['summary']
+            self.dPackageDict['Homepage'] = jsonData['info']['home_page']
+            self.dPackageDict['Requirements'] = jsonData['info']['requires_dist']
+            for data in self.dPackageDict:
 
-        packageDict['Author'] = jsonData['info']['author']
-        packageDict['name'] = jsonData['info']['name']
-        packageDict['version'] = jsonData['info']['version']
-        packageDict['details'] = jsonData['info']['summary']
-        packageDict['Homepage'] = jsonData['info']['home_page']
-        packageDict['Requirements'] = jsonData['info']['requires_dist']
-        for data in packageDict:
+                if self.dPackageDict[data]==None:
 
-            if packageDict[data]==None:
+                    self.dPackageDict[data] = ""
 
-                packageDict[data] = ""
-
-        self._writeData(packageDict)
-
-
-
-
-
-
+            self._writeData(self.dPackageDict['isInstalled'])
 
 
     def _listItemClicked(self):
@@ -181,16 +139,16 @@ class Window(QMainWindow):
         packageURL = "https://pypi.org/project/" + packageName + "/"
         self.dPackageDict['Json page']=jsonDataUrl
         self.dPackageDict['PyPI page'] = packageURL
-        self._fetchPackageData(self.dPackageDict)
+        self.dPackageDict['isInstalled'] = True
+        self._fetchPackageData()
 
 
     def _packageNotFound(self):
-        self.searchBox.setText("Package not Found !")
+        self.IListInfo.setText("Package not Found !")
         return
 
     def _setInstructıonPage(self):
         import pkg_resources
-      # self.listItems.addItem("<INSTALL>")
         self.ListBox.setCurrentItem(self.ListBox.item(0))
         installed_packages = pkg_resources.working_set
         installed_packages_key_list = tuple(sorted(["%s" % (i.key)
@@ -205,61 +163,29 @@ class Window(QMainWindow):
         dPackageDict['isInstalled'] = True
         return dPackageDict
 
+    def _writeData(self, isInstalled):
 
-
-
-
-
-
-    '''def _installClicked(self):
-        instructionText = """Install from PyPI 
-
-                             If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. 
-                             Start by entering the name of the package in the search box above and pressing ENTER.
-
-
-Install from requirements file
-
-Click here to locate requirements.txt file and install the packages specified in it.
-
-Install from local file
-
-Click here to locate and install the package file (usually with .whl, .tar.gz or .zip extension).
-
-Upgrade or uninstall
-
-Start by selecting the package from the left.
-"""
-
-        self.sonuc.setText(instructionText)
-
-    # if(q.text()==self.listItems.item(0)) :
-    '''
-    def _writeData(self, packageDict):
-
-
-
-        if packageDict["isInstalled"] == True:
-           pName = packageDict['name']
-           self.PListInfo.setText(f"{str(packageDict['name']).upper()}")
+        if isInstalled == True:
+           pName = self.dPackageDict['name']
+           self.PListInfo.setText(f"{str(self.dPackageDict['name']).upper()}")
            self.PListInfo.append("\n")
-           self.PListInfo.append(f"Installed version : {packageDict[pName.lower()]}")
+           self.PListInfo.append(f"Installed version : {self.dPackageDict[pName.lower()]}")
            self.PListInfo.append("\n")
-           self.PListInfo.append(f"Latest stable version : {packageDict['version']} ")
-           self.PListInfo.append(f"Summary :{packageDict['details']} ")
-           self.PListInfo.append(f"Homepage : {packageDict['Homepage']}  ")
-           self.PListInfo.append(f"PyPI page :{packageDict['PyPI page']} ")
-           self.PListInfo.append(f"Author : {packageDict['Author']} ")
-           self.PListInfo.append(f"Requires : {str(packageDict['Requirements'])}")
+           self.PListInfo.append(f"Latest stable version : {self.dPackageDict['version']} ")
+           self.PListInfo.append(f"Summary :{self.dPackageDict['details']} ")
+           self.PListInfo.append(f"Homepage : {self.dPackageDict['Homepage']}  ")
+           self.PListInfo.append(f"PyPI page :{self.dPackageDict['PyPI page']} ")
+           self.PListInfo.append(f"Author : {self.dPackageDict['Author']} ")
+           self.PListInfo.append(f"Requires : {str(self.dPackageDict['Requirements'])}")
         else :
-            self.IListInfo.setText(f"{str(packageDict['name']).upper()}")
+            self.IListInfo.setText(f"{str(self.dPackageDict['name']).upper()}")
             self.IListInfo.append("\n")
-            self.IListInfo.append(f"Latest stable version : {packageDict['version']} ")
-            self.IListInfo.append(f"Summary :{packageDict['details']} ")
-            self.IListInfo.append(f"Homepage : {packageDict['Homepage']}  ")
-            self.IListInfo.append(f"PyPI page :{packageDict['PyPI page']} ")
-            self.IListInfo.append(f"Author : {packageDict['Author']} ")
-            self.IListInfo.append(f"Requires : {str(packageDict['Requirements'])}")
+            self.IListInfo.append(f"Latest stable version : {self.dPackageDict['version']} ")
+            self.IListInfo.append(f"Summary :{self.dPackageDict['details']} ")
+            self.IListInfo.append(f"Homepage : {self.dPackageDict['Homepage']}  ")
+            self.IListInfo.append(f"PyPI page :{self.dPackageDict['PyPI page']} ")
+            self.IListInfo.append(f"Author : {self.dPackageDict['Author']} ")
+            self.IListInfo.append(f"Requires : {str(self.dPackageDict['Requirements'])}")
         return
 
 #class IPackage(QDialog) :
