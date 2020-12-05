@@ -8,12 +8,14 @@ import requests
 import sys
 
 
+
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        self.errorMesage = QErrorMessage()
         self.setUI()
         self.show()
+
 
 
 
@@ -47,16 +49,19 @@ class Window(QMainWindow):
         self.searchBox =QLineEdit()
         self.searchBox.setPlaceholderText("Paket ismi girin :")
         searchButton = QPushButton("PyPI'dan paket bul")
+        downloadButton  = QPushButton("İndir")
         self.IListInfo =QTextEdit()
         self.IListInfo.setFrameStyle(0)
         self.IListInfo.setReadOnly(True)
         self.IListInfo.setFixedHeight(300)
+        downloadButton.clicked.connect(lambda : self._downloadPackage())
         self.searchBox.returnPressed.connect(lambda: self._searchQuery(self.searchBox))
         searchButton.clicked.connect(lambda: self._searchQuery(self.searchBox))
 
         hbox1.addWidget(self.searchBox)
         hbox1.addWidget(searchButton)
         hbox2.addWidget(self.IListInfo)
+        hbox2.addWidget(downloadButton)
 
 
         Iwidget.setFixedHeight(400)
@@ -194,6 +199,16 @@ class Window(QMainWindow):
             self.IListInfo.append(f"Yazar : {self.dPackageDict['Author']} ")
             self.IListInfo.append(f"Gerekli olanlar : {str(self.dPackageDict['Requirements'])}")
         return
+
+    def _downloadPackage(self):
+        import subprocess
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install',self.searchBox.text().strip() ])
+        except Exception as e :
+            self.errorMesage.showMessage(str(e))
+
+
+
 
 
 #class IPackage(QDialog) :
