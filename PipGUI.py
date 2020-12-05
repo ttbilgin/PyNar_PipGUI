@@ -25,8 +25,8 @@ class Window(QMainWindow):
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'} #bağlantının engellenmemesi için kullanılan user agent
 
 
-        self.tabWidget.addTab(self._setIpackage(),"Paket İndir")
-        self.tabWidget.addTab(self._setLpackage(),"Paketleri Görüntüle")
+        self.tabWidget.addTab(self._setIpackage(),"Paket Kur")
+        self.tabWidget.addTab(self._setLpackage(),"Paket Kaldır")
         self.dPackageDict = self._setInstructıonPage()
         self.setFixedWidth(600)
         self.setFixedHeight(400)
@@ -175,23 +175,23 @@ class Window(QMainWindow):
                pName = "-".join(tempList)
            self.PListInfo.setText(f"{str(self.dPackageDict['name']).upper()}")
            self.PListInfo.append("\n")
-           self.PListInfo.append(f"Installed version : {self.dPackageDict[pName.lower()]}")
+           self.PListInfo.append(f"İndirilen versiyon : {self.dPackageDict[pName.lower()]}")
            self.PListInfo.append("\n")
-           self.PListInfo.append(f"Latest stable version : {self.dPackageDict['version']} ")
-           self.PListInfo.append(f"Summary :{self.dPackageDict['details']} ")
-           self.PListInfo.append(f"Homepage : {self.dPackageDict['Homepage']}  ")
-           self.PListInfo.append(f"PyPI page :{self.dPackageDict['PyPI page']} ")
-           self.PListInfo.append(f"Author : {self.dPackageDict['Author']} ")
-           self.PListInfo.append(f"Requires : {str(self.dPackageDict['Requirements'])}")
+           self.PListInfo.append(f"Güncel versiyon : {self.dPackageDict['version']} ")
+           self.PListInfo.append(f"Açıklama :{self.dPackageDict['details']} ")
+           self.PListInfo.append(f"Anasayfa : {self.dPackageDict['Homepage']}  ")
+           self.PListInfo.append(f"PyPI sayfası :{self.dPackageDict['PyPI page']} ")
+           self.PListInfo.append(f"Yazar : {self.dPackageDict['Author']} ")
+           self.PListInfo.append(f"Gerekli olanlar : {str(self.dPackageDict['Requirements'])}")
         else :
             self.IListInfo.setText(f"{str(self.dPackageDict['name']).upper()}")
             self.IListInfo.append("\n")
-            self.IListInfo.append(f"Latest stable version : {self.dPackageDict['version']} ")
-            self.IListInfo.append(f"Summary :{self.dPackageDict['details']} ")
-            self.IListInfo.append(f"Homepage : {self.dPackageDict['Homepage']}  ")
-            self.IListInfo.append(f"PyPI page :{self.dPackageDict['PyPI page']} ")
-            self.IListInfo.append(f"Author : {self.dPackageDict['Author']} ")
-            self.IListInfo.append(f"Requires : {str(self.dPackageDict['Requirements'])}")
+            self.IListInfo.append(f"Güncel versiyon : {self.dPackageDict['version']} ")
+            self.IListInfo.append(f"Açıklama :{self.dPackageDict['details']} ")
+            self.IListInfo.append(f"Anasayfa : {self.dPackageDict['Homepage']}  ")
+            self.IListInfo.append(f"PyPI sayfası :{self.dPackageDict['PyPI page']} ")
+            self.IListInfo.append(f"Yazar : {self.dPackageDict['Author']} ")
+            self.IListInfo.append(f"Gerekli olanlar : {str(self.dPackageDict['Requirements'])}")
         return
 
 
