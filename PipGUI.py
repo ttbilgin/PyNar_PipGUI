@@ -51,6 +51,7 @@ class Window(QMainWindow):
         self.IListInfo.setFrameStyle(0)
         self.IListInfo.setReadOnly(True)
         self.IListInfo.setFixedHeight(300)
+        self.searchBox.returnPressed.connect(lambda: self._searchQuery(self.searchBox))
         searchButton.clicked.connect(lambda: self._searchQuery(self.searchBox))
 
         hbox1.addWidget(self.searchBox)
