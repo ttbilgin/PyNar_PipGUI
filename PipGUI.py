@@ -6,15 +6,15 @@ from urllib import parse
 from urllib import request
 import requests
 import sys
-
+import time
+import threading
 
 
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.errorMesage = QErrorMessage()
-        self.setUI()
-        self.show()
+
+
 
 
 
@@ -29,6 +29,8 @@ class Window(QMainWindow):
 
         self.tabWidget.addTab(self._setIpackage(),"Paket Kur")
         self.tabWidget.addTab(self._setLpackage(),"Paket Kaldır")
+
+
         self.dPackageDict = self._setInstructıonPage()
         self.setFixedWidth(600)
         self.setFixedHeight(400)
@@ -38,11 +40,14 @@ class Window(QMainWindow):
 
 
 
+
+
     def _setIpackage(self):
         Iwidget = QWidget()
         Mainbox = QVBoxLayout()
         hbox1 = QHBoxLayout()
         hbox2 = QHBoxLayout()
+        buttonlay=QVBoxLayout()
         Iwidget.setLayout(Mainbox)
         Mainbox.addLayout(hbox1)
         Mainbox.addLayout(hbox2)
@@ -50,18 +55,22 @@ class Window(QMainWindow):
         self.searchBox.setPlaceholderText("Paket ismi girin :")
         searchButton = QPushButton("PyPI'dan paket bul")
         downloadButton  = QPushButton("İndir")
+        translateButton = QPushButton("Çevir")
         self.IListInfo =QTextEdit()
         self.IListInfo.setFrameStyle(0)
         self.IListInfo.setReadOnly(True)
         self.IListInfo.setFixedHeight(300)
+        translateButton.clicked.connect(lambda : self._translate())
         downloadButton.clicked.connect(lambda : self._downloadPackage())
         self.searchBox.returnPressed.connect(lambda: self._searchQuery(self.searchBox))
         searchButton.clicked.connect(lambda: self._searchQuery(self.searchBox))
-
+        buttonlay.addWidget(translateButton)
+        buttonlay.addWidget(downloadButton)
         hbox1.addWidget(self.searchBox)
         hbox1.addWidget(searchButton)
         hbox2.addWidget(self.IListInfo)
-        hbox2.addWidget(downloadButton)
+        hbox2.addLayout(buttonlay)
+
 
 
         Iwidget.setFixedHeight(400)
@@ -202,26 +211,118 @@ class Window(QMainWindow):
 
     def _downloadPackage(self):
         import subprocess
+        self.errorMessage = QErrorMessage()
         try:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install',self.searchBox.text().strip() ])
+
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.searchBox.text().strip()])
+
+        except Exception as e:
+            self.errorMessage.showMessage(str(e))
+
+
+
+    def _translate(self):
+        from google_trans_new import google_translator
+        try:
+            ttext = str(self.dPackageDict['details'])
+            translator = google_translator()
+            translate_text = translator.translate(ttext,lang_src='en',lang_tgt='tr')
+            self.dPackageDict['details'] = translate_text
+
+
         except Exception as e :
-            self.errorMesage.showMessage(str(e))
+            print(e)
+
+        else :
+            self._writeData(False)
 
 
 
 
 
-#class IPackage(QDialog) :
+
+
+
+
+        #class IPackage(QDialog) :
     #def __init__(self):
     #    super.__init__()
 
 
-#class LPackage(QDialog) :
 
-#class DowLisFun() :
+
+
+'''class LoadingScreen(QThread):
+
+    def __init__(self,text):
+        super(LoadingScreen, self).__init__()
+        self.text =text
+        self.errorMesage = QErrorMessage()
+        self.progressBar = QProgressBar()
+        #self.isStopped = False
+    startSignal = pyqtSignal(int)
+    stopSignal = pyqtSignal(int)
+
+
+
+
+
+    def run(self):
+        t1 =threading.Thread(target=self.download)
+        t1.start()
+        t2 = threading.Thread(target=self.startLoad)
+        t2.start()
+        t1.join()
+        t2.join()
+
+
+
+
+    def startLoad(self):
+        self.progressBar.setMaximum(100)
+        self.progressBar.setFixedWidth(300)
+        self.progressBar.setFixedHeight(25)
+        self.progressBar.setWindowTitle("İndiriliyor....")
+        self.progressBar.show()
+        self.progressBar.setValue(0)
+        #self.loadProgressBar()
+
+    def stopLoad(self):
+
+        self.progressBar.setValue(100)
+        time.sleep(2)
+        self.progressBar.close()
+
+
+    def download(self):
+        import subprocess
+
+        try:
+
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.text])
+
+        except Exception as e:
+            self.errorMesage.showMessage(str(e))
+            self.stopLoad()
+        else:
+            self.stopSignal.emit(100)
+
+    def loadProgressBar(self):
+        cnt = 0
+        for _ in range(0,100):
+            cnt += 1
+            self.startSignal.emit(cnt)
+'''
+
+
+
+
+
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Window()
+    window.setUI()
+    window.show()
     sys.exit(app.exec())
