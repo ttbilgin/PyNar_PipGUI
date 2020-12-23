@@ -13,6 +13,8 @@ import threading
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.States = ["running","fetching""installing""uninstalling"]
+        self.currentState = "running"
 
 
 
@@ -25,7 +27,8 @@ class Window(QMainWindow):
         #self.searchurl = 'https://pypi.org/search/?q=' #sayfanın arama kısmı
         self.tabWidget = QTabWidget()
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'} #bağlantının engellenmemesi için kullanılan user agent
-
+        self.messageBox = QMessageBox(QMessageBox.Information,"text","text")
+        self.messageBox.setStandardButtons(QMessageBox.Ok)
 
         self.tabWidget.addTab(self._setIpackage(),"Paket Kur")
         self.tabWidget.addTab(self._setLpackage(),"Paket Kaldır")
@@ -38,36 +41,41 @@ class Window(QMainWindow):
         self.setWindowTitle("Paketleri Yönet")
 
 
-
-
-
-
     def _setIpackage(self):
         Iwidget = QWidget()
+
         Mainbox = QVBoxLayout()
         hbox1 = QHBoxLayout()
         hbox2 = QHBoxLayout()
         buttonlay=QVBoxLayout()
+
         Iwidget.setLayout(Mainbox)
         Mainbox.addLayout(hbox1)
         Mainbox.addLayout(hbox2)
+
         self.searchBox =QLineEdit()
         self.searchBox.setPlaceholderText("Paket ismi girin :")
-        searchButton = QPushButton("PyPI'dan paket bul")
-        downloadButton  = QPushButton("İndir")
-        translateButton = QPushButton("Çevir")
+
+        self.searchButton = QPushButton("PyPI'dan paket bul")
+        self.downloadButton  = QPushButton("İndir")
+        self.translateButton = QPushButton("Çevir")
+
         self.IListInfo =QTextEdit()
         self.IListInfo.setFrameStyle(0)
         self.IListInfo.setReadOnly(True)
         self.IListInfo.setFixedHeight(300)
-        translateButton.clicked.connect(lambda : self._translate())
-        downloadButton.clicked.connect(lambda : self._downloadPackage())
+
+
+        self.translateButton.clicked.connect(lambda : self._translate())
+        self.downloadButton.clicked.connect(lambda : self._downloadPackage())
         self.searchBox.returnPressed.connect(lambda: self._searchQuery(self.searchBox))
-        searchButton.clicked.connect(lambda: self._searchQuery(self.searchBox))
-        buttonlay.addWidget(translateButton)
-        buttonlay.addWidget(downloadButton)
+        self.searchButton.clicked.connect(lambda: self._searchQuery(self.searchBox))
+
+
+        buttonlay.addWidget(self.translateButton)
+        buttonlay.addWidget(self.downloadButton)
         hbox1.addWidget(self.searchBox)
-        hbox1.addWidget(searchButton)
+        hbox1.addWidget(self.searchButton)
         hbox2.addWidget(self.IListInfo)
         hbox2.addLayout(buttonlay)
 
@@ -79,19 +87,34 @@ class Window(QMainWindow):
         return Iwidget
     def _setLpackage(self):
         Lwidget = QWidget()
-        Mainbox = QVBoxLayout()
         hbox1 = QHBoxLayout()
-        Lwidget.setLayout(Mainbox)
-        Mainbox.addLayout(hbox1)
+        vbox1 =QVBoxLayout()
+
+        Lwidget.setLayout(hbox1)
+
+
+
         self.ListBox = QListWidget()
         self.ListBox.setFixedWidth(200)
         self.ListBox.setFixedHeight(350)
+
         self.PListInfo = QTextEdit()
         self.PListInfo.setReadOnly(True)
         self.PListInfo.setFrameStyle(0)
+        self.PListInfo.setFixedWidth(350)
+        self.PListInfo.setFixedHeight(300)
+
+        self.uninstallButton= QPushButton("Kaldır")
+        self.uninstallButton.setEnabled(0)
+
         hbox1.addWidget(self.ListBox)
-        hbox1.addWidget(self.PListInfo)
+        hbox1.addLayout(vbox1)
+        vbox1.addWidget(self.PListInfo)
+        vbox1.addWidget(self.uninstallButton)
+
         self.ListBox.itemClicked.connect(lambda: self._listItemClicked())
+        self.uninstallButton.clicked.connect(self._uninstallPackage)
+
         Lwidget.setFixedHeight(400)
         Lwidget.setFixedWidth(600)
         return Lwidget
@@ -101,6 +124,7 @@ class Window(QMainWindow):
 
         if query.text().strip() == "": #whitespace girilmesi ya da bir şey girilmemesi kontrolü
             self._packageNotFound()
+
             return
         packageName = query.text().strip().lower()
         packageURL = "https://pypi.org/project/"+packageName+"/"
@@ -112,11 +136,6 @@ class Window(QMainWindow):
         self._fetchPackageData()
 
 
-
-
-
-
-
     def _fetchPackageData(self):
         import  json
 
@@ -126,6 +145,7 @@ class Window(QMainWindow):
 
         except Exception as e:
             self._packageNotFound()
+
             print(e)
 
         else:
@@ -147,7 +167,7 @@ class Window(QMainWindow):
 
     def _listItemClicked(self):
 
-
+        self.uninstallButton.setEnabled(1)
         packageName = self.ListBox.currentItem().text()
         jsonDataUrl = self.baseUrl + urllib.parse.quote(
                packageName) + "/json"  # lineedit'e yazılan değere göre sitede arama yapıyoruz
@@ -159,7 +179,10 @@ class Window(QMainWindow):
 
 
     def _packageNotFound(self):
-        self.IListInfo.setText("Package not Found !")
+        self.messageBox.setWindowTitle("Hata")
+        self.messageBox.setText("Paket Bulunamadı!")
+        self.messageBox.setIcon(QMessageBox.Warning)
+        self.messageBox.exec()
         return
 
     def _setInstructıonPage(self):
@@ -210,14 +233,39 @@ class Window(QMainWindow):
         return
 
     def _downloadPackage(self):
-        import subprocess
-        self.errorMessage = QErrorMessage()
-        try:
 
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.searchBox.text().strip()])
 
-        except Exception as e:
-            self.errorMessage.showMessage(str(e))
+        self.tabWidget.setEnabled(0)
+        self.download = Download(self.searchBox.text().strip())
+        self.download.dSignal.connect(self.isFinished)
+        self.download.start()
+
+
+
+    def isFinished(self,val):
+        self.tabWidget.setEnabled(1)
+        if val == -1 :
+            self.messageBox.setIcon(QMessageBox.Warning)
+            self.messageBox.setWindowTitle("Yükleme Hatası")
+            self.messageBox.setText("İndirme Başarısız !!!")
+            self.messageBox.exec()
+        elif val == 100:
+            self.messageBox.setIcon(QMessageBox.Information)
+            self.messageBox.setWindowTitle("Yükleme Tamamlandı")
+            self.messageBox.setText("İndirme Başarılı !!!")
+            self.messageBox.exec()
+        elif val == -2:
+            self.messageBox.setIcon(QMessageBox.Warning)
+            self.messageBox.setWindowTitle("Silme Hatası")
+            self.messageBox.setText("Silme Başarısız !!!")
+            self.messageBox.exec()
+        else:
+            self.messageBox.setIcon(QMessageBox.Information)
+            self.messageBox.setWindowTitle("Silme Tamamlandı")
+            self.messageBox.setText("Silme Başarılı !!!")
+            self.messageBox.exec()
+
+        
 
 
 
@@ -237,64 +285,24 @@ class Window(QMainWindow):
             self._writeData(False)
 
 
+    def _uninstallPackage(self):
+        self.tabWidget.setEnabled(0)
+        self.uninstall = Uninstall(self.ListBox.currentItem().text())
+        self.uninstall.usignal.connect(self.isFinished)
+        self.uninstall.start()
 
 
 
 
-
-
-
-        #class IPackage(QDialog) :
-    #def __init__(self):
-    #    super.__init__()
-
-
-
-
-
-'''class LoadingScreen(QThread):
-
+class Download(QThread):
     def __init__(self,text):
-        super(LoadingScreen, self).__init__()
-        self.text =text
-        self.errorMesage = QErrorMessage()
-        self.progressBar = QProgressBar()
-        #self.isStopped = False
-    startSignal = pyqtSignal(int)
-    stopSignal = pyqtSignal(int)
+        super(Download, self).__init__()
+        self.text = text
 
-
-
-
+    dSignal = pyqtSignal(int)
 
     def run(self):
-        t1 =threading.Thread(target=self.download)
-        t1.start()
-        t2 = threading.Thread(target=self.startLoad)
-        t2.start()
-        t1.join()
-        t2.join()
 
-
-
-
-    def startLoad(self):
-        self.progressBar.setMaximum(100)
-        self.progressBar.setFixedWidth(300)
-        self.progressBar.setFixedHeight(25)
-        self.progressBar.setWindowTitle("İndiriliyor....")
-        self.progressBar.show()
-        self.progressBar.setValue(0)
-        #self.loadProgressBar()
-
-    def stopLoad(self):
-
-        self.progressBar.setValue(100)
-        time.sleep(2)
-        self.progressBar.close()
-
-
-    def download(self):
         import subprocess
 
         try:
@@ -302,21 +310,30 @@ class Window(QMainWindow):
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.text])
 
         except Exception as e:
-            self.errorMesage.showMessage(str(e))
-            self.stopLoad()
+
+            self.dSignal.emit(-1)
         else:
-            self.stopSignal.emit(100)
-
-    def loadProgressBar(self):
-        cnt = 0
-        for _ in range(0,100):
-            cnt += 1
-            self.startSignal.emit(cnt)
-'''
+            self.dSignal.emit(100)
 
 
+class Uninstall(QThread):
+    def __init__(self,text):
+        super().__init__()
+        self.text = text
+    usignal = pyqtSignal(int)
 
+    def run(self):
+        import subprocess
 
+        try:
+
+            subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', self.text])
+
+        except Exception as e:
+
+            self.usignal.emit(-2)
+        else:
+            self.usignal.emit(99)
 
 
 
